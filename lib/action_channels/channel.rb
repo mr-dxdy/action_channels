@@ -23,12 +23,12 @@ module ActionChannels
 
     def add_client(client)
       clients << client
-      ActionChannels.logger.info "The channel #{self.name} added a client"
+      ActionChannels.logger.info "The channel ##{self.name} added a client"
     end
 
     def remove_client(client)
       clients.delete client
-      ActionChannels.logger.info "The channel #{self.name} removed a client"
+      ActionChannels.logger.info "The channel ##{self.name} removed a client"
     end
 
     def notify_all(message)
@@ -38,7 +38,7 @@ module ActionChannels
     end
 
     def process_message(message)
-      ActionChannels.logger.info "The channel #{self.name} received a message #{message.inspect}"
+      ActionChannels.logger.debug "The channel ##{self.name} received a message #{message.inspect}"
 
       case message.type
       when 'subscribe'
