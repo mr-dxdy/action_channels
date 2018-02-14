@@ -3,10 +3,11 @@ require "action_channels"
 
 require 'logger'
 
+LOGGER_PATH = File.expand_path('../../tmp/test.log', __FILE__)
+FileUtils.mkdir_p File.dirname(LOGGER_PATH)
+
 ActionChannels.configure do |config|
-  config.logger = Logger.new(STDOUT).tap do |logger|
-    logger.level = Logger::ERROR
-  end
+  config.logger = Logger.new(LOGGER_PATH)
 end
 
 RSpec.configure do |config|

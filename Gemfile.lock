@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    action_channels (0.0.1)
+    action_channels (0.1.0)
       nio4r-websocket
 
 GEM
