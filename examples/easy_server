@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+# Run server: ./easy_server
+# Run server as daemon: ./easy_server -d start
+# Stop server as daemon: ./easy_server -d stop
+# Get status of server as daemon: ./easy-server -d status
+
+STDERR.sync = STDOUT.sync = true
+
+require 'optparse'
+require 'fileutils'
+require 'action_channels'
+
+begin
+  require 'daemons'
+rescue LoadError
+  raise "You need to add gem 'daemons' to your Gemfile or Rubygems if you wish to use it."
+end
+
+DEFAULT_PORT = 9295
+
+ActionChannels.configure do |config|
+  config.logger = Logger.new(File.expand_path('../easy_server.log', __FILE__))
+end
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: bundle exec easy_server [options]"
+  opts.separator ''
+  opts.on_tail('-h', '--help', 'Help') do
+    puts opts
+    exit 1
+  end
+
+  opts.on('-p', '--port=PORT', "A port of websocket server. Default is #{DEFAULT_PORT}") do |port|
+    options[:port] = port
+  end
+
+  opts.on('-d', '--daemon', "Daemonize the server into the background") do |status|
+    options[:daemon] = status
+  end
+end.parse!
+
+server_proc = Proc.new do |*args|
+  server = ActionChannels::Server.new(port: options.fetch(:port, DEFAULT_PORT))
+  server.run
+
+  puts <<-MSG
+* Websocket server started on port #{server.port}.
+* Version: #{ActionChannels::VERSION}
+Use Ctrl-C to stop
+  MSG
+
+  sig_read, sig_write = IO.pipe
+
+  (%w[INT TERM HUP] & Signal.list.keys).each do |sig|
+    trap sig do
+      sig_write.puts(sig)
+    end
+  end
+
+  while io = IO.select([sig_read])
+    sig = io.first[0].gets.chomp
+
+    exit 0 if %w[INT TERM HUP].include? sig
+  end
+end
+
+if options[:daemon].eql? true
+  daemon_options = {
+    dir_mode: :normal,
+    dir: File.expand_path('../tmp', __FILE__),
+    multiple: false,
+    log_output: false
+  }
+
+  FileUtils.mkdir_p daemon_options[:dir]
+
+  Daemons.run_proc('easy_server', daemon_options) do |*args|
+    server_proc.call *args
+  end
+else
+  server_proc.call
+end
