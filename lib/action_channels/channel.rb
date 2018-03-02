@@ -23,12 +23,16 @@ module ActionChannels
 
     def add_client(client)
       clients << client
+
       ActionChannels.logger.info "The channel ##{self.name} added a client"
+      ActionChannels.logger.debug "Count of client of channel ##{self.name} is #{self.clients.count}."
     end
 
     def remove_client(client)
       clients.delete client
+
       ActionChannels.logger.info "The channel ##{self.name} removed a client"
+      ActionChannels.logger.debug "Count of client of channel ##{self.name} is #{self.clients.count}."
     end
 
     def notify_all(message)
