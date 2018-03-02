@@ -23,6 +23,7 @@ module ActionChannels
     def process_client(client)
       client.on :message, callback_on_message(client)
       client.on :close, callback_on_close(client)
+      client.on :error, callback_on_error(client)
 
       client
     end
@@ -45,6 +46,13 @@ module ActionChannels
 
     def message_sender
       @message_sender ||= MessageSenders::WebSocket.new
+    end
+
+    def callback_on_error(client)
+      lambda do |event|
+        ActionChannels.logger.info "Received error: #{event.message}"
+        channel_repository.all.each { |channel| channel.remove_client(client) }
+      end
     end
 
     def callback_on_close(client)

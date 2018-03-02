@@ -51,5 +51,16 @@ RSpec.describe ActionChannels::Server do
       client.emit :close, WebSocket::Driver::CloseEvent.new
       expect(channel.clients).to be_empty
     end
+
+    it 'should remove client after error' do
+      server = described_class.new(port: port)
+      channel = server.channel_repository.find_by_name_or_create 'custom_channel'
+      channel.add_client client
+      expect(channel.clients.to_a).to eq([client])
+
+      server.process_client(client)
+      client.emit :error, WebSocket::Driver::ProtocolError.new('Not a WebSocket request')
+      expect(channel.clients).to be_empty
+    end
   end
 end
