@@ -41,26 +41,46 @@ RSpec.describe ActionChannels::Server do
       client.emit :message, WebSocket::Driver::MessageEvent.new('random text')
     end
 
-    it 'should remove client after connection closed' do
-      server = described_class.new(port: port)
-      channel = server.channel_repository.find_by_name_or_create 'custom_channel'
-      channel.add_client client
-      expect(channel.clients.to_a).to eq([client])
+    context 'should remove client' do
+      let(:server) { described_class.new(port: port)  }
+      let(:channel) { server.channel_repository.find_by_name_or_create 'custom_channel' }
 
-      server.process_client(client)
-      client.emit :close, WebSocket::Driver::CloseEvent.new
-      expect(channel.clients).to be_empty
+      before do
+        channel.add_client client
+      end
+
+      it 'after connection closed' do
+        expect(channel.clients.to_a).to eq([client])
+
+        server.process_client(client)
+        client.emit :close, WebSocket::Driver::CloseEvent.new
+        expect(channel.clients).to be_empty
+      end
+
+      it 'after error' do
+        expect(channel.clients.to_a).to eq([client])
+
+        server.process_client(client)
+        client.emit :error, WebSocket::Driver::ProtocolError.new('Not a WebSocket request')
+        expect(channel.clients).to be_empty
+      end
+
+      it 'after io_error without arguments' do
+        expect(channel.clients.to_a).to eq([client])
+
+        server.process_client(client)
+        client.emit :io_error
+        expect(channel.clients).to be_empty
+      end
+
+      it 'after io_error with argument' do
+        expect(channel.clients.to_a).to eq([client])
+
+        server.process_client(client)
+        client.emit :io_error, WebSocket::Driver::ProtocolError.new('Not a WebSocket request')
+        expect(channel.clients).to be_empty
+      end
     end
 
-    it 'should remove client after error' do
-      server = described_class.new(port: port)
-      channel = server.channel_repository.find_by_name_or_create 'custom_channel'
-      channel.add_client client
-      expect(channel.clients.to_a).to eq([client])
-
-      server.process_client(client)
-      client.emit :error, WebSocket::Driver::ProtocolError.new('Not a WebSocket request')
-      expect(channel.clients).to be_empty
-    end
   end
 end
