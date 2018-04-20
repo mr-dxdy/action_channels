@@ -4,8 +4,8 @@ module ActionChannels
   class Server
     attr_reader :port
 
-    def initialize(port:)
-      @port = port
+    def initialize(options)
+      @port = options.fetch(:port)
     end
 
     def run

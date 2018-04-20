@@ -11,10 +11,10 @@ module ActionChannels
     attr_reader :name, :clients
     attr_accessor :message_sender
 
-    def initialize(name:, message_sender: MessageSenders::WebSocket.new)
-      @name = name
+    def initialize(attrs)
+      @name = attrs.fetch(:name)
       @clients = Set.new
-      @message_sender = message_sender
+      @message_sender = attrs.fetch :message_sender, MessageSenders::WebSocket.new
     end
 
     def send_message(receiver, message)

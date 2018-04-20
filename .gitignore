@@ -8,6 +8,13 @@
 /tmp/
 /examples/*.log
 /examples/tmp/
+Gemfile.lock
 
 # rspec failure tracking
 .rspec_status
+
+# ignore the Ruby Version manager
+.rvmrc
+.ruby-version
+.ruby-gemset
+.rbenv

@@ -29,11 +29,11 @@ module ActionChannels
       end
     end
 
-    def initialize(channel:, type:, author: nil, details: {})
-      @channel = channel
-      @type = type
-      @author = author
-      @details = details
+    def initialize(attrs)
+      @channel = attrs.fetch(:channel)
+      @type = attrs.fetch(:type)
+      @author = attrs[:author]
+      @details = attrs.fetch :details, {}
     end
 
     def to_raw
