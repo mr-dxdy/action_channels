@@ -29,7 +29,7 @@ module ActionChannels
     attr_reader :channels
 
     def create(channel_name)
-      channel = Channel.new name: channel_name
+      channel = Channels::NewsChannel.new name: channel_name
       channels << channel
       channel
     end

@@ -7,6 +7,15 @@ RSpec.describe ActionChannels::Server do
 
   let(:port) { 5070 }
 
+  it 'add custom channels to server' do
+    rss_channel = double(:channel, name: 'RSS channel')
+    server = described_class.new(port: port, channels: [rss_channel])
+
+    expect(
+      server.channel_repository.find_by_name('RSS channel')
+    ).to eq(rss_channel)
+  end
+
   describe '#process_client' do
     let(:messages) { [] }
 

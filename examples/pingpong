@@ -1,8 +1,5 @@
-# Action channels
+#!/usr/bin/env ruby
 
-## Example
-
-``` ruby
 require 'action_channels'
 
 class PingPongChannel < ActionChannels::Channels::Base
@@ -24,4 +21,24 @@ server = ActionChannels::Server.new(
 )
 
 server.run
-```
+
+puts <<-MSG
+* Websocket server started on port #{server.port}.
+* Version: #{ActionChannels::VERSION}
+Use Ctrl-C to stop
+MSG
+
+
+sig_read, sig_write = IO.pipe
+
+(%w[INT TERM HUP] & Signal.list.keys).each do |sig|
+  trap sig do
+    sig_write.puts(sig)
+  end
+end
+
+while io = IO.select([sig_read])
+  sig = io.first[0].gets.chomp
+
+  exit 0 if %w[INT TERM HUP].include? sig
+end

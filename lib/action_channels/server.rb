@@ -1,23 +1,18 @@
-require 'nio/websocket'
-
 module ActionChannels
   class Server
-    attr_reader :port
+    attr_reader :port, :channel_repository
 
     def initialize(options)
       @port = options.fetch(:port)
+      @channel_repository = ChannelRepository.new options.fetch(:channels, [])
     end
 
     def run
-      NIO::WebSocket.listen port: port do |client|
-        process_client client
+      NIO::WebSocket.listen port: port do |driver|
+        process_client Driver.new(driver)
       end
 
       ActionChannels.logger.info "Server started on port: #{port}"
-    end
-
-    def channel_repository
-      @channel_repository ||= ChannelRepository.new
     end
 
     def process_client(client)

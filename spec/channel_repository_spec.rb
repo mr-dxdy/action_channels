@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe ActionChannels::ChannelRepository do
   describe '#add' do
-    let(:channel_1) { ActionChannels::Channel.new name: 'My channel' }
+    let(:channel_1) { ActionChannels::Channels::NewsChannel.new name: 'My channel' }
     let(:repository) { described_class.new }
 
     it 'should add channel' do
@@ -19,7 +19,7 @@ RSpec.describe ActionChannels::ChannelRepository do
   end
 
   describe '#delete' do
-    let(:channel_1) { ActionChannels::Channel.new name: 'My channel' }
+    let(:channel_1) { ActionChannels::Channels::NewsChannel.new name: 'My channel' }
     let(:repository) { described_class.new }
 
     it 'should delete channel' do
@@ -30,8 +30,8 @@ RSpec.describe ActionChannels::ChannelRepository do
   end
 
   it '#find_by_name' do
-    channel_1 = ActionChannels::Channel.new name: 'Channel 1'
-    channel_2 = ActionChannels::Channel.new name: 'Channel 2'
+    channel_1 = ActionChannels::Channels::NewsChannel.new name: 'Channel 1'
+    channel_2 = ActionChannels::Channels::NewsChannel.new name: 'Channel 2'
 
     repository = described_class.new [channel_1, channel_2]
     expect(repository.find_by_name('Channel 2')).to eq(channel_2)

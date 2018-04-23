@@ -5,18 +5,18 @@ module ActionChannels
     attr_accessor(
       :channel, # [String]
       :type, # [String]
-      :author, # [WebSocket::Driver]
+      :author, # [Driver]
       :details # Hash
     )
 
     class << self
       def parse(message_raw)
-        command_json  = JSON.parse message_raw
+        command_json  = JSON.parse message_raw, symbolize_names: true
 
         new(
-          channel: command_json['channel'],
-          type: command_json['type'],
-          details: command_json.fetch('details', {})
+          channel: command_json[:channel],
+          type: command_json[:type],
+          details: command_json.fetch(:details, {})
         )
       rescue JSON::ParserError => exp
         raise Errors::NotParseMessage, exp.message
@@ -38,6 +38,10 @@ module ActionChannels
 
     def to_raw
       JSON.generate(channel: channel, type: type, details: details)
+    end
+
+    def systemic?
+      %w(subscribe unsubscribe).include? type
     end
   end
 end
